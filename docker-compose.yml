@@ -1,0 +1,55 @@
+version: '2.1'
+services:
+  mysql-server:
+    image: mariadb:10.1
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: mysqladmin ping -uroot -pmysql | grep -c -e "mysqld is alive"
+      interval: 60s
+      timeout: 5s
+
+  wait-for-mysql:
+    image: mariadb:10.1
+    command: hostname
+    depends_on:
+      mysql-server:
+        condition: service_healthy
+
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:alpine-3.2.3
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_PASSWORD=mysql
+    depends_on:
+      mysql-server:
+        condition: service_healthy
+    ports:
+      - "10051:10051"
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:alpine-3.2.3
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_PASSWORD=mysql
+      - ZBX_SERVER_NAME=zabbix-server
+      - TZ=UTC
+    ports:
+      - "80:80"
+    depends_on:
+      - zabbix-server
+
+  puppet:
+    image: puppet/puppetserver-standalone
+    depends_on:
+      - zabbix-web
+
+  client:
+    image: centos
+    build: centos
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    depends_on:
+     - puppet
