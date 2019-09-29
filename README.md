@@ -1,6 +1,6 @@
 # zabbix-puppet
 
-Proof-of-concept for Zabbix 3.0 and Puppet.
+Proof-of-concept for Zabbix 3.0 and Puppet auto-registration
 
 ## Installation
 
@@ -14,7 +14,7 @@ You need the following requisites:
 
 Steps:
 
-1. Checkout this repository (git clone https://github.com/DataArm/zabbix-puppet.git)
+1. Checkout this repository (git clone <GIT URL>)
 1. cd to the repository and spin up all containers: `docker-compose up --build -d`
 1. A lot of information will come up, at the end, you should see 5 containers running,
 when executing `docker-compose ps`, e.g:
